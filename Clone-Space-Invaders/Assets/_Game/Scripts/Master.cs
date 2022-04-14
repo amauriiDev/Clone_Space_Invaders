@@ -21,6 +21,8 @@ public class Master : MonoBehaviour
 
     public GameController gameController {get; private set;}
     public AudioController audioController {get; private set;}
+    public GameObject bullet;
+
 
     void Start() {
         gameController = GetComponentInChildren<GameController>();

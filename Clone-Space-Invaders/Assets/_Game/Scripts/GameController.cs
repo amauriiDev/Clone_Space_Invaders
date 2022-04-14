@@ -4,15 +4,25 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
-    // Start is called before the first frame update
+    public bool touch = false;
+    private float overtimeDisableTouch, disableTouch = 2.0f;
+
     void Start()
     {
-        
+        overtimeDisableTouch = 0;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void FixedUpdate()
     {
-        
+        if (touch)
+        {
+            overtimeDisableTouch += Time.fixedDeltaTime;
+            if (overtimeDisableTouch >= disableTouch)
+            {
+                overtimeDisableTouch = 0;
+                touch = false;
+            }
+        }
     }
+
 }
