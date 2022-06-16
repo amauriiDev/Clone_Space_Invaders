@@ -2,40 +2,52 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody2D))] // component RigidBody2D is required
 public class Bullet : MonoBehaviour
 {
-    private Rigidbody2D rigid;
-    [SerializeField] private float speed = 50;
+    //* Private attributes
+    private Rigidbody2D rigid;  // RigidBody2D componnent variable
+    [SerializeField] private float speed = 4;  // Firing speed (set in inspector)
+    [SerializeField] private int direction;     // Shooting direction (set in inspector)
+    [SerializeField] private string targetName; // Target tag (set in inspector)
 
-    [SerializeField] private int direction;
+    //* Public attributes
 
-    [SerializeField]private string targetName;
+
+    //* Private Methods
     void Start()
     {
-        rigid = GetComponent<Rigidbody2D>();
-        rigid.velocity = Vector2.up * direction * speed;
+        rigid = GetComponent<Rigidbody2D>();    // assigning the component RigidBody2D to the variable
+        rigid.velocity = Vector2.up * direction * speed;    // Sets the firing speed once instantiated
     }
 
-    void Update()
+    private void OnCollisionEnter2D(Collision2D other)
     {
-
-    }
-
-    private void OnCollisionEnter2D(Collision2D other) {
-
-        //targetName para inimigos = Player
-        //targetName para player = Enemy
-        if (other.gameObject.CompareTag(targetName))
+        //targetName for enemies = Player
+        //targetName para the player = Enemy
+        if (other.collider.tag == targetName)
         {
-            Destroy(other.gameObject);
+            // if a shot that came out of an 'Enemy' collides with the player, 
+            // call the PlayerController's TakeDamage() method
+            if (targetName == "Player")               
+                other.gameObject.GetComponent<PlayerController>().TakeDamage();     
+
+            // if a shot that came out of an 'Player' collides with enemies, 
+            // call the Enemy's Death() method
+            if (targetName == "Enemy")
+                other.gameObject.GetComponent<Enemy>().Death();
+
+            // Regardless of who threw it, destroy the shot
             Destroy(this.gameObject);
         }
-        
-        // Pode acontecer de o disparo nao acertar o alvo
-        // Será destruido se acertar tanto a parede Superior como a inferior
-        else if (other.gameObject.CompareTag("Destroyer"))
+
+        // It may happen that the shot does not hit the target,
+        // it will be destroyed if it hits both the upper and lower walls
+        else if (other.collider.CompareTag("Destroyer"))
         {
             Destroy(this.gameObject);
         }
     }
+
+    //* Public Methods
 }

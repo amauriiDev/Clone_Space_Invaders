@@ -100,6 +100,7 @@ MonoBehaviour:
   shoot: {fileID: 6541340378361608777, guid: a7995d75111d3dd4689e0ede843e8888, type: 3}
   direction: 1
   speed: 1.5
+  score: 100
 --- !u!61 &7578754284200817834
 BoxCollider2D:
   m_ObjectHideFlags: 0

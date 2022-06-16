@@ -4,40 +4,43 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
+    //* Private attributes
+    private const float accelerateTime = 6.0f;      // Every N seconds the enemy accelerates
+    private float accelerateOvertime = 0;           // Control variable for acceleration
+    private float translateTime, translateOvertime = 0;     // How fast the translocation will be and its control variable
+    private float time2fire, overtime = 0;  // How fast will the trigger be and its control variable
+    [SerializeField] private float speed = 50;      // Enemy speed (set in inspector)
+    [SerializeField] private int score = 100;       // Enemy value score (set in inspector)
 
-    public GameObject shoot;
-
-    private float time2fire, overtime = 0;
-
-    private float translateTime, overtime1 = 0;
-    private float accelerateTime;
-    public float direction = 1;
-    [SerializeField] private float speed = 50;
-
+    //* Public attributes
+    public GameObject shoot;        // Shooting location reference
+    public float direction = 1;     // Reference to the direction in the X axis
+    
+    ///* Delegates
     public delegate void MyDelegate();
     private static MyDelegate onTouchWall;
     public static MyDelegate onDropLayer;
-
-
+    
+    //* Private methods
     void Start()
     {
+        // Initializing values
         translateTime = 1.0f;
         time2fire = Random.Range(4.0f, 24.0f);
-        accelerateTime = 6.0f;
 
+        // Registration in delegates
         onTouchWall += ChangeSide;
         onTouchWall += DropLayer;
-
     }
 
     void FixedUpdate()
     {
         overtime += Time.fixedDeltaTime;
-        overtime1 += Time.fixedDeltaTime;
+        translateOvertime += Time.fixedDeltaTime;
 
-        if (overtime1 >= translateTime)
+        if (translateOvertime >= translateTime)
         {
-            overtime1 = 0;
+            translateOvertime = 0;
             transform.position = Vector2.Lerp(transform.position, transform.position - new Vector3(10 * direction, 0, 0), speed * Time.fixedDeltaTime);
         }
 
@@ -47,10 +50,10 @@ public class Enemy : MonoBehaviour
             Instantiate(shoot, transform.position + new Vector3(0, -0.4f, 0), Quaternion.identity);
         }
 
-        accelerateTime -= Time.fixedDeltaTime;
-        if (accelerateTime <= 0.0f)
+        accelerateOvertime += Time.fixedDeltaTime;
+        if (accelerateOvertime >= accelerateTime)
         {
-            accelerateTime = 6.0f;
+            accelerateOvertime = 0;
             if (translateTime > 0.2f)
             {
                 translateTime -= 0.1f;
@@ -58,11 +61,18 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    void ChangeSide()
+    /// <summary>
+    /// The direction you are going in X is changed
+    /// </summary>
+    private void ChangeSide()
     {
         this.direction *= -1;
     }
-    void DropLayer()
+
+    /// <summary>
+    /// Enemy is translocated to a level closer to the player
+    /// </summary>
+    private void DropLayer()
     {
         transform.position = Vector2.Lerp(transform.position, 
                                     transform.position - new Vector3(0, 10, 0),
@@ -78,10 +88,19 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    private void OnDestroy()
+    void OnDestroy()
     {
         onTouchWall -= ChangeSide;
         onTouchWall -= DropLayer;
     }
 
+    //* Public methods
+
+    /// <summary>
+    /// Method called when enemy dies
+    /// </summary>
+    public void Death(){
+        Master.Instance.gameController.UpdateScore(score);
+        Destroy(this.gameObject);
+    }
 }
